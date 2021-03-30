@@ -43,7 +43,7 @@ export class App extends Component
     return (
       <div className="App">
         <header className="App-header">
-          <ToDoCreator /> 
+          <ToDoCreator fetchAllItems = {this.fetchAllItems.bind(this)}/> 
 
           <img src={logo} className="App-logo" alt="logo" />
 

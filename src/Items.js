@@ -5,12 +5,14 @@ import PropTypes from 'prop-types'
 const Items = props => {
     // map the items from props into an array
     const itemList = props.items.map((newItem) => 
-        <Item key = {newItem.id} item = {newItem} fetchAllItems = {props.fetchAllItems} />
+        <Item key = {newItem.id} 
+              item = {newItem} 
+              fetchAllItems = {props.fetchAllItems} />
     )
 
     return (
         <div>
-            <ul>{itemList}</ul>
+            <ul style={{ listStyleType: "none" }} >{itemList}</ul>
         </div>
     )
 }

@@ -5,16 +5,16 @@ const Item = props =>
 {
     // will strikethorugh if complete, regular o/w
     return (
-        <li>
+        <li >
             <input
                 type="checkbox"
-                checked={!props.item.completed}
+                checked={props.item.completed}
                 onChange={() => toggleCompleted(props.item, props.fetchAllItems) }
             />
 
             {(props.item.completed) ?
-                <span>{props.item.content}</span> :
-                <del>{props.item.content}</del>}
+                <del>{props.item.content}</del> :
+                <span>{props.item.content}</span> }
 
             <button onClick = {() => deleteItem(props.item, props.fetchAllItems)}>Delete</button>
         </li>
