@@ -1,81 +1,118 @@
-import React from 'react'
 import PropTypes from 'prop-types'
+import React, { Component } from 'react'
+import UpdateItem from './UpdateItem'
 
-const Item = props =>
+export class Item extends Component
 {
-    // will strikethorugh if complete, regular o/w
-    return (
-        <li >
-            <input
-                type="checkbox"
-                checked={props.item.completed}
-                onChange={() => toggleCompleted(props.item, props.fetchAllItems) }
-            />
 
-            {(props.item.completed) ?
-                <del>{props.item.content}</del> :
-                <span>{props.item.content}</span> }
+    constructor(props)
+    {
+        super(props)
 
-            <button onClick = {() => deleteItem(props.item, props.fetchAllItems)}>Delete</button>
-        </li>
-    )
-}
+        this.state = {
+            itemIsBeingEdited: false,
+        }
+    }
 
-Item.propTypes = {
-    item: PropTypes.object,
 
+    async patchCompletedStatus(oldItem) 
+    {
+        try
+        {
+            const newItem = { completed: !oldItem.completed } // flips the completed var in new item
+            const requestOptions = {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newItem)
+            };
+            const url = "http://localhost:3001/api/items/" + oldItem.id;
+            const response = await fetch(url, requestOptions);
+            const json = await response.json();
+            console.log(json);
+        }
+        catch (e) 
+        {
+            console.error(e)
+        }
+    }
+
+    async toggleCompleted(item, fetchAll)
+    {
+        await this.patchCompletedStatus(item);
+        console.log('toggle function firing')
+        this.props.fetchAllItems();
+    }
+
+    async sendDeleteRequest(item)
+    {
+        try
+        {
+            const requestOptions = {
+                method: 'DELETE',
+            };
+            const url = "http://localhost:3001/api/items/" + item.id;
+            const response = await fetch(url, requestOptions);
+            console.log(response);
+        }
+        catch (e) 
+        {
+            console.error(e)
+        }
+    }
+
+    async deleteItem(item, fetchAll)
+    {
+        await this.sendDeleteRequest(item);
+        console.log('deletion firing');
+        await this.props.fetchAllItems();
+    }
+
+    toggleEdit()
+    {
+        this.setState({ itemIsBeingEdited: !this.state.itemIsBeingEdited })
+        console.log('toggle edit mode')
+    }
+
+    render()
+    {
+        if (this.state.itemIsBeingEdited) // then show the update prompt
+        {
+            return (
+                <li >
+                    <UpdateItem toggleEdit={this.toggleEdit.bind(this)} 
+                                fetchAllItems = {this.props.fetchAllItems}
+                                item = {this.props.item} />
+                </li>
+            )
+        }
+        
+        else 
+        {
+            return (
+                <li >
+                    <input
+                        type="checkbox"
+                        checked={this.props.item.completed}
+                        onChange={() => this.toggleCompleted(this.props.item, this.props.fetchAllItems)}
+                    />
+
+                    {(this.props.item.completed) ?
+                        <del>{this.props.item.content}</del> :
+                        <span>{this.props.item.content}</span>}
+
+                    <button onClick={() => this.toggleEdit()}>Edit</button>
+                    <button onClick={() => this.deleteItem(this.props.item, this.props.fetchAllItems)}>Delete</button>
+                </li>
+            )
+        }
+    }
 }
 
 export default Item
 
-async function patchCompletedStatus(oldItem) 
-{
-    try
-    {
-        const newItem = { completed: !oldItem.completed } // flips the completed var in new item
-        const requestOptions = {
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newItem)
-        };
-        const url = "http://localhost:3001/api/items/" + oldItem.id;
-        const response = await fetch(url, requestOptions);
-        const json = await response.json();
-        console.log(json);
-    }
-    catch (e) 
-    {
-        console.error(e)
-    }
+Item.propTypes = {
+    item: PropTypes.object,
+    fetchAllItems: PropTypes.func,
 }
 
-async function toggleCompleted(item, fetchAll)
-{
-    await patchCompletedStatus(item);
-    console.log('toggle function firing')
-    fetchAll(); 
-}
 
-async function sendDeleteRequest(item)
-{
-    try
-    {
-        const requestOptions = {
-            method: 'DELETE',
-        };
-        const url = "http://localhost:3001/api/items/" + item.id;
-        const response = await fetch(url, requestOptions);
-        console.log(response);
-    }
-    catch (e) 
-    {
-        console.error(e)
-    }
-}
-
-async function deleteItem(item, fetchAll)
-{
-    await sendDeleteRequest(item);
-    console.log('deletion firing');
-    await fetchAll(); 
-}

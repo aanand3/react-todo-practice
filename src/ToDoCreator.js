@@ -23,6 +23,7 @@ export class ToDoCreator extends Component
         // post the new item text and then get all items
         await this.postItem(this.state.userInput);
         await this.props.fetchAllItems(); 
+        this.setState({userInput: ""})
     }
 
     handleChange(event)
